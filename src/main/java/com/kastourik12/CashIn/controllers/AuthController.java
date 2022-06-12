@@ -1,5 +1,6 @@
 package com.kastourik12.CashIn.controllers;
 
+import com.kastourik12.CashIn.exception.ResourceNotFoundException;
 import com.kastourik12.CashIn.models.CustomUser;
 import com.kastourik12.CashIn.models.ERole;
 import com.kastourik12.CashIn.models.Role;
@@ -97,26 +98,26 @@ public class AuthController {
 
 		if (strRoles == null) {
 			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					.orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
 				switch (role) {
 				case "admin":
 					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
 					roles.add(adminRole);
 
 					break;
 				case "mod":
 					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new ResourceNotFoundException("Role is not found."));
 					roles.add(modRole);
 
 					break;
 				default:
 					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new ResourceNotFoundException("Role is not found."));
 					roles.add(userRole);
 				}
 			});
