@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,5 +20,5 @@ public class SignupRequest {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    Set<String> roles;
+    List<String> roles;
 }
