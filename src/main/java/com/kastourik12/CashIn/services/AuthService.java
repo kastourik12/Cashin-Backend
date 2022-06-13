@@ -1,4 +1,6 @@
 package com.kastourik12.CashIn.services;
+import com.kastourik12.CashIn.common.MailService;
+import com.kastourik12.CashIn.common.NotificationEmail;
 import com.kastourik12.CashIn.exception.CustomException;
 import com.kastourik12.CashIn.models.CustomUser;
 import com.kastourik12.CashIn.models.ERole;
@@ -41,6 +43,8 @@ public class AuthService {
     private JwtUtils jwtUtils;
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
+    @Autowired
+    private MailService mailService;
 
     @Autowired
     PasswordEncoder encoder;
@@ -117,23 +121,29 @@ public class AuthService {
         }
         user.setRoles(roles);
         userRepository.save(user);
-        generateVerificationToken(user);
+        String token =generateVerificationToken(user);
+        mailService.sendMail(new NotificationEmail("Please Activate your Account",
+                user.getEmail(), "Thank you for signing up to Cashin, " +
+                "please click on the below url to activate your account : " +
+                "http://localhost:8080/api/auth/accountVerification/" + token));
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    public ResponseEntity<?> verifyUser(String username) {
-        CustomUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException("User not found with username: " + username));
+    public ResponseEntity<?> verifyUser(String verificationToken) {
+        VerificationToken token = verificationTokenRepository.findByToken(verificationToken).orElseThrow(()-> new CustomException("Invalid Token"));
+        String username = token.getUser().getUsername();
+        CustomUser user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException("User not found with name - " + username));
         user.setEnabled(true);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User verified successfully!"));
     }
 
-    private void generateVerificationToken(CustomUser user) {
+    private String generateVerificationToken(CustomUser user) {
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(UUID.randomUUID().toString());
         verificationToken.setUser(user);
         verificationTokenRepository.save(verificationToken);
+        return verificationToken.getToken();
     }
 
 }
