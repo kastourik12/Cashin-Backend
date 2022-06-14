@@ -1,6 +1,7 @@
 package com.kastourik12.CashIn.services;
 import com.kastourik12.CashIn.common.MailService;
 import com.kastourik12.CashIn.common.NotificationEmail;
+import com.kastourik12.CashIn.events.UserRegistrationEvent;
 import com.kastourik12.CashIn.exception.CustomException;
 import com.kastourik12.CashIn.models.CustomUser;
 import com.kastourik12.CashIn.models.ERole;
@@ -15,7 +16,11 @@ import com.kastourik12.CashIn.security.jwt.JwtUtils;
 import com.kastourik12.CashIn.security.services.UserDetailsImpl;
 import com.kastourik12.CashIn.security.verficationKey.VerificationToken;
 import com.kastourik12.CashIn.security.verficationKey.VerificationTokenRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,23 +36,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private CustomUserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private VerificationTokenRepository verificationTokenRepository;
-    @Autowired
-    private MailService mailService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final CustomUserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final VerificationTokenRepository verificationTokenRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
+    private final MailService mailService;
+    private final PasswordEncoder encoder;
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -121,27 +121,23 @@ public class AuthService {
         }
         user.setRoles(roles);
         userRepository.save(user);
-        String token =generateVerificationToken(user);
-        mailService.sendMail(new NotificationEmail("Please Activate your Account",
-                user.getEmail(), "Thank you for signing up to Cashin, " +
-                "please click on the below url to activate your account : " +
-                "http://localhost:8080/api/auth/accountVerification/" + token));
+        eventPublisher.publishEvent(new UserRegistrationEvent(user));
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
     public ResponseEntity<?> verifyUser(String verificationToken) {
         VerificationToken token = verificationTokenRepository.findByToken(verificationToken).orElseThrow(()-> new CustomException("Invalid Token"));
-        String username = token.getUser().getUsername();
+        String username = token.getUsername();
         CustomUser user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException("User not found with name - " + username));
         user.setEnabled(true);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User verified successfully!"));
     }
 
-    private String generateVerificationToken(CustomUser user) {
+    private String generateVerificationToken(String username) {
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(UUID.randomUUID().toString());
-        verificationToken.setUser(user);
+        verificationToken.setUsername(username);
         verificationTokenRepository.save(verificationToken);
         return verificationToken.getToken();
     }

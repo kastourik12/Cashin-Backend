@@ -18,7 +18,6 @@ public class VerificationToken implements Serializable {
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String token;
-    @OneToOne(targetEntity = CustomUser.class, fetch = FetchType.EAGER)
-    private CustomUser user;
+    private String username;
 
 }
