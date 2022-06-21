@@ -78,6 +78,12 @@ public class AuthService {
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
+        if(userRepository.existsByPhone(signupRequest.getPhoneNumber())){
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Phone is already in use!"));
+
+        }
         CustomUser user = CustomUser.builder()
                 .username(signupRequest.getUsername())
                 .password(encoder.encode(signupRequest.getPassword()))

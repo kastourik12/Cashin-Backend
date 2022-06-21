@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -37,6 +36,8 @@ public class CustomUser {
     private String lastName;
     @NotBlank
     private String phone;
+    @Nullable
+    private Integer credit;
     private Boolean enabled;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(	name = "user_roles",

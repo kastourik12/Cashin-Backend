@@ -1,4 +1,4 @@
-package com.kastourik12.CashIn.security;
+package com.kastourik12.CashIn.Config;
 
 
 import com.kastourik12.CashIn.security.jwt.AuthEntryPointJwt;
@@ -62,7 +62,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.authorizeRequests().antMatchers("/api/auth/**").permitAll()
 			.antMatchers("/api/test/**").permitAll()
 			.anyRequest().authenticated();
-
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 }
