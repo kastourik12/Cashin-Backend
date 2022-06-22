@@ -36,8 +36,11 @@ public class CustomUser {
     private String lastName;
     @NotBlank
     private String phone;
-    @Nullable
     private Integer credit;
+    @Nullable
+    private String imageURL;
+    @Enumerated(EnumType.STRING)
+    private ECurrency defaultCurrency;
     private Boolean enabled;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(	name = "user_roles",

@@ -3,6 +3,7 @@ package com.kastourik12.CashIn.payload.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
@@ -25,5 +26,5 @@ public class SignupRequest {
     private String lastName;
     @NotBlank
     private String phoneNumber;
-    List<String> roles = new ArrayList<>() ;
+
 }

@@ -4,6 +4,7 @@ import com.kastourik12.CashIn.common.NotificationEmail;
 import com.kastourik12.CashIn.events.UserRegistrationEvent;
 import com.kastourik12.CashIn.exception.CustomException;
 import com.kastourik12.CashIn.models.CustomUser;
+import com.kastourik12.CashIn.models.ECurrency;
 import com.kastourik12.CashIn.models.ERole;
 import com.kastourik12.CashIn.models.Role;
 import com.kastourik12.CashIn.payload.reponse.JwtResponse;
@@ -46,7 +47,6 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    private final MailService mailService;
     private final PasswordEncoder encoder;
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -57,14 +57,13 @@ public class AuthService {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
+                .map(GrantedAuthority::getAuthority).toList();
+        CustomUser user = userRepository.findByUsernameOrEmailOrPhone(userDetails.getUsername()).orElseThrow(() -> new CustomException("User not found"));
         return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+                "Bearer",
+                user.getFirstName(),
+                user.getLastName()
+                ));
     }
     public ResponseEntity<?> saveUser(SignupRequest signupRequest) {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
@@ -92,43 +91,18 @@ public class AuthService {
                 .lastName(signupRequest.getLastName())
                 .phone(signupRequest.getPhoneNumber())
                 .enabled(false)
+                .defaultCurrency(ECurrency.USD)
+                .credit(0)
                 .roles(new HashSet<Role>())
                 .build();
-
-        Set<String> strRoles = new HashSet<String>(signupRequest.getRoles());
-        Set<Role> roles = new HashSet<>();
-
-
-        if (strRoles == null) {
+            Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new CustomException("Error: Role is not found."));
             roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new CustomException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new CustomException("Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new CustomException("Role is not found."));
-                        roles.add(userRole);
-                }
-            });
-        }
-        user.setRoles(roles);
+            user.setRoles(roles);
         userRepository.save(user);
         eventPublisher.publishEvent(new UserRegistrationEvent(user));
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("User registered successfully! you need to activate your account ! check your email"));
     }
 
     public ResponseEntity<?> verifyUser(String verificationToken) {
