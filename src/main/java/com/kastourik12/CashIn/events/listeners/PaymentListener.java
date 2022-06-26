@@ -1,4 +1,4 @@
-package com.kastourik12.CashIn.listeners;
+package com.kastourik12.CashIn.events.listeners;
 
 import com.kastourik12.CashIn.events.PaymentEvent;
 import com.kastourik12.CashIn.models.CustomUser;

@@ -2,9 +2,12 @@ package com.kastourik12.CashIn.models;
 
 import com.paypal.api.payments.Amount;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
 @AllArgsConstructor @NoArgsConstructor @Getter @Setter
@@ -25,6 +28,11 @@ public class Payment {
 
     @OneToOne
     private CustomUser to;
+
+    @CreationTimestamp
+    private Instant createdAt;
+    @UpdateTimestamp
+    private Instant updatedAt;
 
 
 }

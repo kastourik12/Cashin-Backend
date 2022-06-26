@@ -1,16 +1,19 @@
 package com.kastourik12.CashIn.payload.reponse;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import java.util.Date;
 
-import java.util.List;
 
 @AllArgsConstructor
 @Data
+@Builder
 public class JwtResponse {
-	private String token;
-	private String type ;
-	private String firstName;
-	private String lastName;
+	private String authenticationToken;
+	private String refreshToken ;
+	private Date expiresAt;
+	private String username;
+
 
 }

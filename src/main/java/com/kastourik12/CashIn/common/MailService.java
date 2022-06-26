@@ -1,10 +1,8 @@
 package com.kastourik12.CashIn.common;
 
 import com.kastourik12.CashIn.exception.CustomException;
-import com.kastourik12.CashIn.security.verficationKey.MailContentBuilder;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -31,7 +29,11 @@ public class MailService {
         };
         try {
             mailSender.send(messagePreparator);
-            log.info("Activation email sent!!");
+            if (notificationEmail.getSubject().equals("Transaction")){
+                log.info("Transaction email sent to " + notificationEmail.getRecipient());
+            } else {
+                log.info("Verification email sent to " + notificationEmail.getRecipient());
+            }
         } catch (MailException e) {
             log.error("Exception occurred when sending mail", e);
             throw new CustomException("Exception occurred when sending mail to " + notificationEmail.getRecipient(), e);

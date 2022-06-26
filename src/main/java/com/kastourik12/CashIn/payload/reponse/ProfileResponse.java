@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class ProfileResponse {
     private String name;
-    private String Credit;
+    private String credit;
     private String currency;
+
 }

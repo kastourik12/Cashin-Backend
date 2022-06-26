@@ -23,28 +23,30 @@ public class CustomUserService {
         CustomUser user = getCurrentUser();
         ProfileResponse profileResponse = new ProfileResponse();
                         profileResponse.setName(user.getUsername() + " " + user.getLastName());
-        if((currency == null) || (currency == user.getDefaultCurrency())){
-
-                        profileResponse.setCurrency(user.getDefaultCurrency().toString());
-                        profileResponse.setCredit(user.getCredit().toString());
+        if(user.getCredit() <= 0){
+            profileResponse.setCredit("0");
+            profileResponse.setCurrency(currency.toString());
+        } else if ((currency == null) || (currency == user.getDefaultCurrency()) && (user.getCredit() > 0)) {
+            profileResponse.setCurrency(user.getDefaultCurrency().toString());
+            profileResponse.setCredit(user.getCredit().toString());
         }
+
         else {
-                        switch (currency){
-                            case USD:
-                                profileResponse.setCurrency("USD");
-                                profileResponse.setCredit(currencyService.ChangeCurrency("USD", user.getDefaultCurrency().toString(), user.getCredit().toString()));
-                                break;
-                            case EUR:
-                                profileResponse.setCurrency("EUR");
-                                profileResponse.setCredit(currencyService.ChangeCurrency("EUR", user.getDefaultCurrency().toString(), user.getCredit().toString()));
-                                break;
-                            case GBP:
-                                profileResponse.setCurrency("GBP");
-                                profileResponse.setCredit(currencyService.ChangeCurrency("GBP", user.getDefaultCurrency().toString(), user.getCredit().toString()));
-                                break;
-                            default:
-                                throw new CustomException("Currency not found");
-                        }
+            switch (currency) {
+                case USD -> {
+                    profileResponse.setCurrency("USD");
+                    profileResponse.setCredit(currencyService.ChangeCurrency("USD", user.getDefaultCurrency().toString(), user.getCredit().toString()));
+                }
+                case EUR -> {
+                    profileResponse.setCurrency("EUR");
+                    profileResponse.setCredit(currencyService.ChangeCurrency("EUR", user.getDefaultCurrency().toString(), user.getCredit().toString()));
+                }
+                case GBP -> {
+                    profileResponse.setCurrency("GBP");
+                    profileResponse.setCredit(currencyService.ChangeCurrency("GBP", user.getDefaultCurrency().toString(), user.getCredit().toString()));
+                }
+                default -> throw new CustomException("Currency not found");
+            }
 
         }
 

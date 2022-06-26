@@ -20,6 +20,9 @@ public class JwtUtils {
   @Value("${app.jwtExpirationMs}")
   private int jwtExpirationMs;
 
+  @Value("${app.jwtRefreshExpirationMs}")
+  private int jwtRefreshExpirationMs;
+
 
 
   public String generateJwtToken(Authentication authentication) {
@@ -30,6 +33,15 @@ public class JwtUtils {
         .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
         .compact();
   }
+  public String generateRefreshToken(Authentication authentication) {
+
+    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+
+    return Jwts.builder().setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
+            .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .compact();
+  }
+
 
   public String getUserNameFromJwtToken(String token) {
     return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
@@ -53,4 +65,11 @@ public class JwtUtils {
 
     return false;
   }
+
+
+  public long getJwtRefreshExpirationInMillis() {
+    return jwtRefreshExpirationMs;
+  }
+
+
 }

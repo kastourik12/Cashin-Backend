@@ -1,4 +1,4 @@
-package com.kastourik12.CashIn.security.verficationKey;
+package com.kastourik12.CashIn.common;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
