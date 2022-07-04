@@ -22,7 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     CustomUser user = userRepository.findByUsernameOrEmailOrPhone(username)
         .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
-
     return UserDetailsImpl.build(user);
   }
 

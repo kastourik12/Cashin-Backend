@@ -9,11 +9,10 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@Entity
+
 @AllArgsConstructor @NoArgsConstructor @Getter @Setter
 public class Payment {
-    @Id
-    @GeneratedValue(strategy = javax.persistence.GenerationType.AUTO)
+
     private Long id;
 
     private Integer amount;
@@ -25,14 +24,7 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private EClient client;
     private String from;
-
-    @OneToOne
-    private CustomUser to;
-
-    @CreationTimestamp
-    private Instant createdAt;
-    @UpdateTimestamp
-    private Instant updatedAt;
+    
 
 
 }

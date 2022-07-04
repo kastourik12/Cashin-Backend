@@ -21,12 +21,7 @@ public class RefreshTokenService {
      return  token;
 
     }
-    public RefreshToken getRefreshToken(String token) {
-        return refreshTokenRepository.findByToken(token).orElseThrow(() -> new CustomException("Invalid refresh token"));
-    }
-    public void deleteRefreshToken(String token) {
-        refreshTokenRepository.deleteByToken(token);
-    }
+
 
 
     public String getUsernameFromRefreshToken(String token) {

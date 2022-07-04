@@ -3,6 +3,7 @@ package com.kastourik12.CashIn.exception;
 
 import com.kastourik12.CashIn.security.jwt.AuthTokenFilter;
 import com.kastourik12.CashIn.security.jwt.JwtUtils;
+import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<?> usernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(),"user is not found ", request.getDescription(false));
+        ErrorDetails errorDetails = new ErrorDetails(new Date(),"username or password are not valid ", request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(Exception.class)
@@ -33,4 +34,10 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(PayPalRESTException.class)
+    public ResponseEntity<?> payPalExceptionHandler(PayPalRESTException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

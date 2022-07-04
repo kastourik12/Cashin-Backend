@@ -70,6 +70,9 @@ public class JwtUtils {
   public long getJwtRefreshExpirationInMillis() {
     return jwtRefreshExpirationMs;
   }
+  public long getJwtExpirationInMillis() {
+    return jwtExpirationMs;
+  }
 
 
 }

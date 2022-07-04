@@ -11,10 +11,5 @@ public class Payout {
     private Integer sum;
     private ECurrency currency;
     private EClient client;
-    @OneToOne
-    private CustomUser to;
-    @CreationTimestamp
-    private Instant createdAt;
-    @UpdateTimestamp
-    private Instant updatedAt;
+
 }

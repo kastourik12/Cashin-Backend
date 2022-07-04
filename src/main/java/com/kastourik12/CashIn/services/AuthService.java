@@ -23,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,20 +47,22 @@ public class AuthService {
 
     private final PasswordEncoder encoder;
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        String refreshToken = refreshTokenService.generateRefreshToken(authentication);
-        JwtResponse response = JwtResponse.builder()
-                .authenticationToken(jwt)
-                .refreshToken(refreshToken)
-                .username(loginRequest.getUsername())
-                .expiresAt(Date.from(Instant.now().plusMillis(jwtUtils.getJwtRefreshExpirationInMillis())))
-                .build();
-
-        return ResponseEntity.ok(response);
-
+        if(userRepository.existsByUsername(loginRequest.getUsername())) {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            String refreshToken = refreshTokenService.generateRefreshToken(authentication);
+            JwtResponse response = JwtResponse.builder()
+                    .authenticationToken(jwt)
+                    .refreshToken(refreshToken)
+                    .username(loginRequest.getUsername())
+                    .expiresAt(Date.from(Instant.now().plusMillis(jwtUtils.getJwtExpirationInMillis())))
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            throw new UsernameNotFoundException("Username or password are invalid " + loginRequest.getUsername());
+        }
     }
     public ResponseEntity<?> saveUser(SignupRequest signupRequest) {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
@@ -129,8 +132,8 @@ public class AuthService {
         refreshTokenService.removeAllTokensByuser(username);
     }
     public ResponseEntity<?> signOut(String token) {
-        refreshTokenService.deleteRefreshToken(token);
-        removeAllTokensByUsername(jwtUtils.getUserNameFromJwtToken(token));
+        String username = refreshTokenService.getUsernameFromRefreshToken(token);
+        refreshTokenService.removeAllTokensByuser(username);
         return ResponseEntity.ok(new MessageResponse("User signed out successfully!"));
     }
 
