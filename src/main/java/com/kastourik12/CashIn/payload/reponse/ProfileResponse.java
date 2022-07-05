@@ -9,5 +9,4 @@ public class ProfileResponse {
     private String name;
     private String credit;
     private String currency;
-
 }

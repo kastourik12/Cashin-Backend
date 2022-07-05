@@ -1,27 +1,29 @@
 package com.kastourik12.CashIn.controllers;
 
+import com.kastourik12.CashIn.models.EPaymentStatus;
+import com.kastourik12.CashIn.payload.reponse.PayPalResponse;
 import com.kastourik12.CashIn.payload.request.PayPalPaymentRequest;
 import com.kastourik12.CashIn.services.PayPalService;
+import com.kastourik12.CashIn.services.PaymentService;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @RestController()
 @RequestMapping("api/v1/paypal")
 @RequiredArgsConstructor
+@Slf4j
 public class PayPalController {
-    private final PayPalService payPalService; 
+    private final PayPalService payPalService;
+    private final PaymentService paymentService;
+
+
     @PostMapping("/pay")
     public ResponseEntity<?> createPayment(@RequestBody PayPalPaymentRequest paymentRequest) throws PayPalRESTException {
 
@@ -29,7 +31,8 @@ public class PayPalController {
         for (Links link : createPayment.getLinks()) {
             if (link.getRel().equalsIgnoreCase("approval_url")) {
                 String redirectUrl = link.getHref();
-                return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.LOCATION, redirectUrl).build();
+                paymentService.createPayment(createPayment);
+                return ResponseEntity.status(HttpStatus.OK).body(new PayPalResponse(redirectUrl));
             }
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payment creation failed");
@@ -37,9 +40,13 @@ public class PayPalController {
 
 
     @GetMapping("/execute")
-    public ResponseEntity<?> executePayment(@RequestHeader String paymentId, @RequestHeader String payerId)   {
+    public ResponseEntity<?> executePayment(@RequestParam String paymentId, @RequestParam String PayerID) throws PayPalRESTException {
         try {
-            return ResponseEntity.ok(payPalService.paymentConfirmation(paymentId, payerId));
+            Payment confirmedPayment = payPalService.paymentConfirmation(paymentId, PayerID);
+            if (confirmedPayment.getState().equalsIgnoreCase("approved")) {
+                return ResponseEntity.status(HttpStatus.SEE_OTHER).body("Payment approved");
+            }
+            return ResponseEntity.ok(confirmedPayment);
         }
         catch (PayPalRESTException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

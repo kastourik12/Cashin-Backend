@@ -128,9 +128,7 @@ public class AuthService {
         }
         return ResponseEntity.badRequest().body(new MessageResponse("Invalid Token"));
     }
-    private void removeAllTokensByUsername(String username){
-        refreshTokenService.removeAllTokensByuser(username);
-    }
+
     public ResponseEntity<?> signOut(String token) {
         String username = refreshTokenService.getUsernameFromRefreshToken(token);
         refreshTokenService.removeAllTokensByuser(username);
