@@ -1,6 +1,6 @@
 package com.kastourik12.CashIn.controllers;
 
-import com.kastourik12.CashIn.payload.request.TransactionPayload;
+import com.kastourik12.CashIn.payload.request.TransactionRequest;
 import com.kastourik12.CashIn.services.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,8 @@ public class TransactionController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<?> SendToUser(@RequestBody TransactionPayload transactionPayload ){
-        return transactionService.SendToUser(transactionPayload);
+    public ResponseEntity<?> SendToUser(@RequestBody TransactionRequest transactionRequest){
+        return transactionService.SendToUser(transactionRequest);
     }
 
 }

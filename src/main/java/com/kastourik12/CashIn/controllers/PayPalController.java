@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 
 @RestController()
@@ -40,18 +41,29 @@ public class PayPalController {
 
 
     @GetMapping("/execute")
-    public ResponseEntity<?> executePayment(@RequestParam String paymentId, @RequestParam String PayerID) throws PayPalRESTException {
+    public RedirectView executePayment(@RequestParam String paymentId, @RequestParam String PayerID) throws PayPalRESTException {
         try {
             Payment confirmedPayment = payPalService.paymentConfirmation(paymentId, PayerID);
             if (confirmedPayment.getState().equalsIgnoreCase("approved")) {
-                return ResponseEntity.status(HttpStatus.SEE_OTHER).body("Payment approved");
+                paymentService.updatePayerId(paymentId, PayerID);
+                paymentService.updatePaymentStatus(paymentId, EPaymentStatus.PAID);
+                RedirectView redirectView = new RedirectView();
+                redirectView.setUrl("http://localhost:4200/");
+                return redirectView;
+
             }
-            return ResponseEntity.ok(confirmedPayment);
-        }
-        catch (PayPalRESTException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl("http://localhost:4200/");
+            return redirectView;
+
+        } catch (PayPalRESTException e) {
+            paymentService.updatePaymentStatus(paymentId, EPaymentStatus.CANCELLED);
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl("http://localhost:4200/payment-failed");
+            return redirectView;
         }
 
 
+
+    }
 }

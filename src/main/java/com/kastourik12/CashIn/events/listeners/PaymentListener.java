@@ -1,5 +1,4 @@
 package com.kastourik12.CashIn.events.listeners;
-
 import com.kastourik12.CashIn.events.PaymentEvent;
 import com.kastourik12.CashIn.models.CustomUser;
 import com.kastourik12.CashIn.models.EPaymentStatus;
@@ -17,6 +16,7 @@ import javax.transaction.Transactional;
 @Transactional
 public class PaymentListener implements ApplicationListener<PaymentEvent> {
     private final CustomUserRepository userRepository;
+
     private final PaymentRepository paymentRepository;
     @Override
     public void onApplicationEvent(PaymentEvent event) {
@@ -25,12 +25,12 @@ public class PaymentListener implements ApplicationListener<PaymentEvent> {
             CustomUser receiver = event.getPayment().getUser();
             if(receiver.getCredit() != null)
             {
-                receiver.setCredit(receiver.getCredit() + Integer.parseInt(event.getPayment().getAmount()));
+                receiver.setCredit(receiver.getCredit() +  event.getPayment().getAmount().intValue()  );
                 userRepository.save(receiver);
             }
             else
             {
-                receiver.setCredit(Integer.parseInt(event.getPayment().getAmount()));
+                receiver.setCredit(event.getPayment().getAmount().intValue());
                 userRepository.save(receiver);
             }
         }

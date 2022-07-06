@@ -4,7 +4,7 @@ import com.kastourik12.CashIn.events.TransactionEvent;
 import com.kastourik12.CashIn.exception.CustomException;
 import com.kastourik12.CashIn.models.CustomUser;
 import com.kastourik12.CashIn.models.Transaction;
-import com.kastourik12.CashIn.payload.request.TransactionPayload;
+import com.kastourik12.CashIn.payload.request.TransactionRequest;
 import com.kastourik12.CashIn.repositories.CustomUserRepository;
 import com.kastourik12.CashIn.repositories.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +34,14 @@ public class TransactionService {
         return ResponseEntity.ok(transactionList);
     }
 
-    public ResponseEntity<?> SendToUser(TransactionPayload transactionPayload) {
+    public ResponseEntity<?> SendToUser(TransactionRequest transactionRequest) {
         CustomUser from = customUserService.getCurrentUser();
         CustomUser to = userRepository.
-                findByUsernameOrEmailOrPhone(transactionPayload.getReceiver()).
+                findByUsernameOrEmailOrPhone(transactionRequest.getReceiver()).
                 orElseThrow(() -> new CustomException("User not found"));
         Transaction transaction = new Transaction();
-                    transaction.setAmount(transactionPayload.getAmount());
-                    transaction.setCurrency(transactionPayload.getCurrency());
+                    transaction.setAmount(transactionRequest.getAmount());
+                    transaction.setCurrency(transactionRequest.getCurrency());
                     transaction.setFrom(from);
                     transaction.setTo(to);
         transactionRepository.save(transaction);

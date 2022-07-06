@@ -6,7 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class TransactionPayload {
+public class TransactionRequest {
     @NotBlank
     private String receiver;
     @NotBlank

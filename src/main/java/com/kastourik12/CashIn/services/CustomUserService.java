@@ -49,9 +49,6 @@ public class CustomUserService {
             }
 
         }
-
-
-
         return ResponseEntity.ok(profileResponse);
     }
     public CustomUser getCurrentUser(){
