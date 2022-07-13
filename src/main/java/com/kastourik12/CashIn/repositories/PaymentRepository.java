@@ -25,8 +25,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByPaymentId(String paymentId);
 
-    @Query(value = "select x.* from payments x where x.user_id =?1;",nativeQuery = true)
-    List<Payment> findAllByUserId(Long userId );
+    @Query(value = "select x.* from payments x where x.user_id = :id",nativeQuery = true)
+    List<Payment> findAllByUserId(Long id);
 
 }
 
